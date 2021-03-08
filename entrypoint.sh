@@ -9,9 +9,6 @@ fi
 
 echo "Requesting token at '${token_url}'"
 
-payload=$(curl -sX POST -H "Authorization: token ${GITHUB_PAT}" ${token_url})
-export RUNNER_TOKEN=$(echo $payload | jq .token --raw-output)
-
 if [ -z "${RUNNER_NAME}" ]; then
     RUNNER_NAME=$(hostname)
 fi
@@ -24,13 +21,6 @@ fi
     --labels "${RUNNER_LABELS}" \
     --unattended \
     --replace
-
-remove() {
-    payload=$(curl -sX POST -H "Authorization: token ${GITHUB_PAT}" ${token_url%/registration-token}/remove-token)
-    export REMOVE_TOKEN=$(echo $payload | jq .token --raw-output)
-
-    ./config.sh remove --unattended --token "${REMOVE_TOKEN}"
-}
 
 trap 'remove; exit 130' INT
 trap 'remove; exit 143' TERM
